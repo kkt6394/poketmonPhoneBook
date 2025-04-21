@@ -12,10 +12,12 @@ class TableViewCell: UITableViewCell {
     
     let pokemonImageView: UIImageView = {
         let imageView = UIImageView()
+        imageView.image = UIImage(named: "")
         imageView.layer.borderColor = UIColor.black.cgColor
         imageView.layer.borderWidth = 1.0
         imageView.contentMode = .scaleAspectFit
-        imageView.layer.cornerRadius = 20
+        imageView.layer.cornerRadius = 30
+        
         return imageView
     }()
     
@@ -46,16 +48,15 @@ class TableViewCell: UITableViewCell {
             nameLabel,
             numLabel
         ]
-            .forEach { contentView.addSubview($0)}
+            .forEach { contentView.addSubview($0) }
         
         pokemonImageView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.top.equalToSuperview().offset(20)
             $0.leading.equalToSuperview().offset(30)
-            $0.size.equalTo(40)
-            
+            $0.size.equalTo(60)
             
         }
+        
         nameLabel.snp.makeConstraints {
             $0.centerY.equalTo(pokemonImageView.snp.centerY)
             $0.leading.equalTo(pokemonImageView.snp.trailing).offset(40)

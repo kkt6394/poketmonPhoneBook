@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import Alamofire
 
 class ViewController: UIViewController {
     
@@ -40,7 +41,7 @@ class ViewController: UIViewController {
     
     // UI구성 메서드 설정
     private func configureUI() {
-
+        
         view.backgroundColor = .white
         
         [listLabel, addButton, tableView].forEach { view.addSubview($0) }
@@ -71,17 +72,16 @@ class ViewController: UIViewController {
     func buttonTapped() {
         navigationController?.pushViewController(PhoneBookViewController(), animated: true)
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         configureUI()
-
+        
     }
     
     
 }
-
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         2
@@ -95,6 +95,9 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         80
     }
+    
 }
+
+
 
 
