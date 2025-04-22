@@ -8,8 +8,11 @@
 import UIKit
 import SnapKit
 import Alamofire
+import CoreData
 
 class PhoneBookViewController: UIViewController {
+    
+    var container: NSPersistentContainer!
     
     var basicNum: Int = 0
     // 프로필 이미지
@@ -83,6 +86,10 @@ class PhoneBookViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        self.container = appDelegate.persistentContainer
+        
         view.backgroundColor = .white
         
         // 내비게이션 아이템
@@ -92,6 +99,7 @@ class PhoneBookViewController: UIViewController {
         
         configureUI()
     }
+    // 데이터 통신 메서드
     private func fetchData<T: Decodable>(url: URL, completion: @escaping (Result<T, AFError>) -> Void) {
         AF.request(url).responseDecodable(of: T.self) { response in
             completion(response.result)
@@ -105,15 +113,15 @@ class PhoneBookViewController: UIViewController {
         fetchData(url: url) { [weak self] (result: Result<Pokemon, AFError>) in
             switch result {
             case .success(let result):
-//                // 기본
-//                guard let imageUrl = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/\(result.id).png") else { return }
-//                // 7세대
-//                guard let imageUrl = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/\(result.id).png") else { return }
-//                // 썬문
-//                guard let imageUrl = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/\(result.id).png") else { return }
+                //                // 기본
+                //                guard let imageUrl = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/\(result.id).png") else { return }
+                //                // 7세대
+                //                guard let imageUrl = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/\(result.id).png") else { return }
+                //                // 썬문
+                //                guard let imageUrl = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vii/ultra-sun-ultra-moon/\(result.id).png") else { return }
                 // 6세대 x-y ( 범위 넘어감 )
                 guard let imageUrl = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/x-y/shiny/\(result.id).png") else { return }
-
+                
                 
                 
                 AF.request(imageUrl).responseData { response in
@@ -126,12 +134,28 @@ class PhoneBookViewController: UIViewController {
             case .failure(let error):
                 print("\(error)")
             }
-            
         }
     }
+    
+    func createData(name: String, phoneNum: String, image: Data) {
+        guard let entity = NSEntityDescription.entity(forEntityName: Phonebook.className, in: self.container.viewContext) else { return }
+        let newPhonebook = NSManagedObject(entity: entity, insertInto: self.container.viewContext)
+        newPhonebook.setValue(name, forKey: Phonebook.Key.name)
+        newPhonebook.setValue(phoneNum, forKey: Phonebook.Key.phoneNum)
+        newPhonebook.setValue(image, forKey: Phonebook.Key.image)
+        
+        do {
+            try self.container.viewContext.save()
+            print("문맥 저장 성공")
+        } catch {
+            print("문맥 저장 실패")
+        }
+    }
+    
     @objc
     func adjustButtonTapped() {
-        
+        createData(name: nameTextField.text ?? "", phoneNum: numTextField.text ?? "", image: (profileImageView.image?.pngData())!)
+
     }
     
     @objc
