@@ -11,6 +11,26 @@ import Alamofire
 
 class ViewController: UIViewController {
     
+    var dataSource: [Phonebook] = [] {
+        didSet {
+            tableView.reloadData()
+        }
+    }
+    
+    func fetchPhonebook() {
+        guard let container = PhoneBookViewController.container else {
+            print("초기화 안됨")
+            return
+        }
+
+        do {
+            let fetchData = try PhoneBookViewController.container.viewContext.fetch(Phonebook.fetchRequest())
+            dataSource = fetchData
+            print("데이터 가져오기 성공: \(dataSource.count)개")
+        } catch {
+            print("데이터 가져오기 실패")
+        }
+    }
     // 친구목록 레이블 생성
     let listLabel: UILabel = {
         let listLabel = UILabel()
@@ -73,22 +93,44 @@ class ViewController: UIViewController {
         navigationController?.pushViewController(PhoneBookViewController(), animated: true)
     }
     
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        PhoneBookViewController.container = appDelegate.persistentContainer
+
         configureUI()
+
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+    
+    override func viewIsAppearing(_ animated: Bool) {
+        super.viewIsAppearing(animated)
+        fetchPhonebook()
+
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
     }
     
     
 }
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        2
+        dataSource.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCell.id) as? TableViewCell else { return UITableViewCell() }
+        cell.configureCell(phonebook: dataSource[indexPath.row])
         return cell
     }
     

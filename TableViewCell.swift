@@ -66,4 +66,13 @@ class TableViewCell: UITableViewCell {
             $0.trailing.equalToSuperview().offset(-30)
         }
     }
+    public func configureCell(phonebook: Phonebook) {
+        if let imageData = phonebook.image {
+            pokemonImageView.image = UIImage(data: imageData)
+        } else {
+            pokemonImageView.image = nil
+        }
+        nameLabel.text = phonebook.name
+        numLabel.text = phonebook.phoneNum
+    }
 }

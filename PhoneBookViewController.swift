@@ -12,7 +12,7 @@ import CoreData
 
 class PhoneBookViewController: UIViewController {
     
-    var container: NSPersistentContainer!
+    static var container: NSPersistentContainer! 
     
     var basicNum: Int = 0
     // 프로필 이미지
@@ -38,6 +38,7 @@ class PhoneBookViewController: UIViewController {
     let nameTextField: UITextField = {
         let textField = UITextField()
         textField.borderStyle = .roundedRect
+        textField.placeholder = "이름을 입력하세요"
         return textField
     }()
     
@@ -45,6 +46,8 @@ class PhoneBookViewController: UIViewController {
     let numTextField: UITextField = {
         let textField = UITextField()
         textField.borderStyle = .roundedRect
+        textField.placeholder = "전화번호를 입력하세요"
+        textField.keyboardType = .phonePad
         return textField
     }()
     
@@ -87,8 +90,6 @@ class PhoneBookViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        self.container = appDelegate.persistentContainer
         
         view.backgroundColor = .white
         
@@ -98,6 +99,7 @@ class PhoneBookViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "적용", style: .plain, target: self, action: #selector(adjustButtonTapped))
         
         configureUI()
+        
     }
     // 데이터 통신 메서드
     private func fetchData<T: Decodable>(url: URL, completion: @escaping (Result<T, AFError>) -> Void) {
@@ -126,9 +128,9 @@ class PhoneBookViewController: UIViewController {
                 
                 AF.request(imageUrl).responseData { response in
                     if let data = response.data, let image = UIImage(data: data) {
-                        DispatchQueue.main.async {
+//                        DispatchQueue.main.async {
                             self?.profileImageView.image = image
-                        }
+//                        }
                     }
                 }
             case .failure(let error):
@@ -138,23 +140,42 @@ class PhoneBookViewController: UIViewController {
     }
     
     func createData(name: String, phoneNum: String, image: Data) {
-        guard let entity = NSEntityDescription.entity(forEntityName: Phonebook.className, in: self.container.viewContext) else { return }
-        let newPhonebook = NSManagedObject(entity: entity, insertInto: self.container.viewContext)
+        guard let entity = NSEntityDescription.entity(forEntityName: Phonebook.className, in: PhoneBookViewController.container.viewContext) else { return }
+        let newPhonebook = NSManagedObject(entity: entity, insertInto: PhoneBookViewController.container.viewContext)
         newPhonebook.setValue(name, forKey: Phonebook.Key.name)
         newPhonebook.setValue(phoneNum, forKey: Phonebook.Key.phoneNum)
         newPhonebook.setValue(image, forKey: Phonebook.Key.image)
         
         do {
-            try self.container.viewContext.save()
+            try PhoneBookViewController.container.viewContext.save()
             print("문맥 저장 성공")
         } catch {
             print("문맥 저장 실패")
         }
     }
     
+    
+    func readAllData() {
+        do {
+            let phonebooks = try PhoneBookViewController.container.viewContext.fetch(Phonebook.fetchRequest())
+            for phonebook in phonebooks as [NSManagedObject] {
+                if let name = phonebook.value(forKey: Phonebook.Key.name) as? String,
+                   let phoneNum = phonebook.value(forKey: Phonebook.Key.phoneNum) as? String,
+                   let image = phonebook.value(forKey: Phonebook.Key.image) as? String {
+                    print("name: \(name), phoneNumber: \(phoneNum), image: \(image)")
+                    
+                }
+            }
+        } catch {
+            print("데이터 읽기 실패")
+        }
+    }
+    
     @objc
     func adjustButtonTapped() {
         createData(name: nameTextField.text ?? "", phoneNum: numTextField.text ?? "", image: (profileImageView.image?.pngData())!)
+        navigationController?.popViewController(animated: true)
+//        readAllData()
 
     }
     
