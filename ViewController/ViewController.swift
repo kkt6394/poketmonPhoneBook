@@ -102,6 +102,7 @@ class ViewController: UIViewController {
         PhoneBookViewController.container = appDelegate.persistentContainer
 
         configureUI()
+        fetchPhonebook()
 
         
     }
@@ -112,7 +113,6 @@ class ViewController: UIViewController {
     
     override func viewIsAppearing(_ animated: Bool) {
         super.viewIsAppearing(animated)
-        fetchPhonebook()
 
     }
     
