@@ -7,12 +7,13 @@
 
 import UIKit
 import SnapKit
-import Alamofire
 
 class ViewController: UIViewController {
     
     var dataSource: [Phonebook] = [] {
         didSet {
+            
+
             tableView.reloadData()
         }
     }
@@ -26,6 +27,7 @@ class ViewController: UIViewController {
         do {
             let fetchData = try PhoneBookViewController.container.viewContext.fetch(Phonebook.fetchRequest())
             dataSource = fetchData
+
             print("데이터 가져오기 성공: \(dataSource.count)개")
         } catch {
             print("데이터 가져오기 실패")
@@ -109,6 +111,7 @@ class ViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.isNavigationBarHidden = true
     }
     
     override func viewIsAppearing(_ animated: Bool) {
